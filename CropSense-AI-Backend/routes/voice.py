@@ -39,6 +39,7 @@ async def ask_ai(data: VoiceRequest):
         ask for missing details like crop stage, soil type, location, and symptoms.
       - Never give dangerous chemical recommendations without context.
       - Keep answers simple for farmers.
+      - For crop diseases or plant problems, explain possible causes, symptoms to check, and basic steps to solve the issue.
 
     Farmer's Question:
     {data.question}
