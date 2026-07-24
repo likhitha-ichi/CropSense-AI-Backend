@@ -6,12 +6,10 @@ import os
 router = APIRouter()
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-
 for m in genai.list_models():
     print(m.name)
 # Temporary model (we'll replace it after seeing the logs)
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-1.5-flash-latest")
 
 
 class VoiceRequest(BaseModel):
