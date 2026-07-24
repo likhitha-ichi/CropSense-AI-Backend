@@ -27,7 +27,7 @@ origins = [
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5173",
     # Replit frontend
-    "https://e853cbe2-84cf-48b9-8768-f92309e13eec-00-2g8ehzxt2ycdm.sisko.replit.dev",
+    "https://crop-sense-ai--likhitha1004.replit.app",
 ]
 
 app.add_middleware(
