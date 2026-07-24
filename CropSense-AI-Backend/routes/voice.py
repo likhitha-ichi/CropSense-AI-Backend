@@ -1,45 +1,45 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-import google.generativeai as genai
+from google import genai
 import os
 
 router = APIRouter()
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-for m in genai.list_models():
-    print(m.name)
-model = genai.GenerativeModel("gemini-2.0-flash")
+client = genai.Client(
+        api_key=os.getenv("GEMINI_API_KEY")
+    )
 
 
 class VoiceRequest(BaseModel):
-    question: str
-    language: str
+        question: str
+        language: str
 
 
 class VoiceResponse(BaseModel):
-    answer: str
+        answer: str
 
 
 @router.post("/ask", response_model=VoiceResponse)
 async def ask_ai(data: VoiceRequest):
 
-    prompt = f"""
-    You are CropSense AI, an intelligent agriculture assistant.
+        prompt = f"""
+        You are CropSense AI, an agriculture assistant.
 
-    Rules:
-    - Answer ONLY agriculture-related questions.
-    - Support crop prediction, weather, irrigation, soil health, fertilizer, pests and diseases.
-    - Reply in {data.language}.
-    - Keep answers short (2-5 sentences).
-    - Use simple language a farmer can understand.
-    - If the question is unrelated to farming, politely say you only answer agriculture questions.
+        Rules:
+        - Answer only farming-related questions.
+        - Help with crops, soil, irrigation, fertilizer, pests and diseases.
+        - Reply in {data.language}.
+        - Keep answers short and simple for farmers.
 
-    Farmer's Question:
-    {data.question}
-    """
+        Farmer question:
+        {data.question}
+        """
 
-    response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt
+        )
 
-    return VoiceResponse(
-        answer=response.text
-    )
+        return VoiceResponse(
+            answer=response.text
+        )
