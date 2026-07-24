@@ -7,7 +7,11 @@ router = APIRouter()
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-model = genai.GenerativeModel("gemini-2.5-flash")
+
+for m in genai.list_models():
+    print(m.name)
+# Temporary model (we'll replace it after seeing the logs)
+model = genai.GenerativeModel("gemini-2.0-flash")
 
 
 class VoiceRequest(BaseModel):
