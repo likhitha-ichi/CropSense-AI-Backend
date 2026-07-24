@@ -2,6 +2,9 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from groq import Groq
 import os
+import requests
+from fastapi.responses import StreamingResponse
+from io import BytesIO
 
 router = APIRouter()
 
@@ -60,6 +63,42 @@ async def ask_ai(data: VoiceRequest):
         temperature=0.5,
         max_tokens=300
     )
+    @router.post("/speak")
+    async def speak(text: dict):
+
+        api_key = os.getenv("ELEVENLABS_API_KEY")
+
+        voice_id = "EXAVITQu4vr4xnSDxMaL"
+
+        url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+
+        headers = {
+            "xi-api-key": api_key,
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "text": text["text"],
+            "model_id": "eleven_multilingual_v2",
+            "voice_settings": {
+                "stability": 0.5,
+                "similarity_boost": 0.75
+            }
+        }
+
+        response = requests.post(
+            url,
+            headers=headers,
+            json=payload
+        )
+
+        if response.status_code != 200:
+            return {"error": response.text}
+
+        return StreamingResponse(
+            BytesIO(response.content),
+            media_type="audio/mpeg"
+        )
 
     return VoiceResponse(
         answer=response.choices[0].message.content

@@ -1,5 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from models.pest_models import PestDetectionResponse
+import random
+from typing import cast
 
 router = APIRouter()
 
@@ -28,20 +30,58 @@ async def detect_pest(file: UploadFile = File(..., description="Crop leaf or pla
     #   img_array = preprocess_image(contents)
     #   prediction = pest_model.predict(img_array)
 
-    return PestDetectionResponse(
-        detected_pest="Aphids",
-        confidence=0.87,
-        severity="Moderate",
-        treatment=[
-            "Apply neem oil spray (5 ml per litre of water).",
-            "Introduce natural predators such as ladybugs.",
-            "Remove heavily infested leaves and dispose of them away from the field.",
-        ],
-        file_name=file.filename,
-        file_size_kb=round(file_size_kb, 2),
-        message="Placeholder response – pest detection model not yet loaded.",
-    )
+    import random
 
+    pests = [
+        {
+            "name": "Aphids",
+            "severity": "Moderate",
+            "treatment": [
+                "Apply neem oil spray.",
+                "Introduce ladybugs.",
+                "Remove heavily infested leaves."
+            ]
+        },
+        {
+            "name": "Leaf Miner",
+            "severity": "Low",
+            "treatment": [
+                "Remove damaged leaves.",
+                "Use sticky traps.",
+                "Apply neem oil if needed."
+            ]
+        },
+        {
+            "name": "Rice Blast",
+            "severity": "High",
+            "treatment": [
+                "Apply recommended fungicide.",
+                "Reduce excess nitrogen fertilizer.",
+                "Avoid overhead irrigation."
+            ]
+        },
+        {
+            "name": "Early Blight",
+            "severity": "Moderate",
+            "treatment": [
+                "Remove infected leaves.",
+                "Spray copper fungicide.",
+                "Improve air circulation."
+            ]
+        }
+    ]
+
+    prediction = random.choice(pests)
+
+    return PestDetectionResponse(
+        detected_pest=str(prediction["name"]),
+        confidence=float(round(random.uniform(0.88, 0.98), 2)),
+        severity=str(prediction["severity"]),
+        treatment=cast(list[str], prediction["treatment"]), # leave this for now
+        file_name=file.filename if file.filename else "",
+        file_size_kb=round(file_size_kb, 2),
+        message="Demo prediction. AI model will be connected later."
+    )
 
 @router.get("/pests", summary="List detectable pests and diseases")
 def list_pests():
