@@ -96,8 +96,15 @@ async def speak(text: dict):
         json=payload
     )
 
+    print("Status:", response.status_code)
+    print("Content-Type:", response.headers.get("content-type"))
+    print("Length:", len(response.content))
+    print("Text:", response.text[:300])
+
     if response.status_code != 200:
-        return {"error": response.text}
+        return {
+            "error": response.text
+        }
 
     return StreamingResponse(
         BytesIO(response.content),
