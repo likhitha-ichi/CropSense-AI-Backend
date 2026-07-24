@@ -20,13 +20,14 @@ app = FastAPI(
 # CORS – allow any local React dev server and any deployed origin you add here
 # ---------------------------------------------------------------------------
 origins = [
-    "http://localhost:3000",    # Create React App default
-    "http://localhost:5173",    # Vite default
+    "http://localhost:3000",
+    "http://localhost:5173",
     "http://localhost:5174",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5173",
-    # Add your production frontend URL here, e.g.:
-    # "https://my-cropsense-frontend.vercel.app",
+
+    # Replit frontend
+    "https://e853cbe2-84cf-48b9-8768-f92309e13eec-00-2g8ehzxt2ycdm.sisko.replit.dev",
 ]
 
 app.add_middleware(
