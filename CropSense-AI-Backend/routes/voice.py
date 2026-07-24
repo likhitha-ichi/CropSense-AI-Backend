@@ -5,6 +5,9 @@ import os
 import requests
 from fastapi.responses import StreamingResponse
 from io import BytesIO
+from fastapi import Response
+
+ 
 
 router = APIRouter()
 
@@ -67,6 +70,8 @@ async def ask_ai(data: VoiceRequest):
     return VoiceResponse(
         answer=response.choices[0].message.content
     )
+from fastapi import Response
+
 @router.post("/speak")
 async def speak(text: dict):
 
@@ -99,14 +104,15 @@ async def speak(text: dict):
     print("Status:", response.status_code)
     print("Content-Type:", response.headers.get("content-type"))
     print("Length:", len(response.content))
-    print("Text:", response.text[:300])
 
     if response.status_code != 200:
-        return {
-            "error": response.text
-        }
+        return {"error": response.text}
 
-    return StreamingResponse(
-        BytesIO(response.content),
-        media_type="audio/mpeg"
+    return Response(
+        content=response.content,
+        media_type="audio/mpeg",
+        headers={
+            "Content-Disposition": "inline; filename=speech.mp3"
+        }
     )
+  
