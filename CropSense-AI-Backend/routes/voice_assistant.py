@@ -1,6 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from models.voice_models import VoiceQueryRequest, VoiceQueryResponse
 
+
 router = APIRouter()
 
 
