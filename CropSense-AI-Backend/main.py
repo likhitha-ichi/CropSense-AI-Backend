@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from routes import voice
 
 from routes import (
     crop_prediction,
@@ -25,7 +26,6 @@ origins = [
     "http://localhost:5174",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5173",
-
     # Replit frontend
     "https://e853cbe2-84cf-48b9-8768-f92309e13eec-00-2g8ehzxt2ycdm.sisko.replit.dev",
 ]
@@ -44,9 +44,14 @@ app.add_middleware(
 app.include_router(crop_prediction.router, prefix="/api/crop", tags=["Crop Prediction"])
 app.include_router(weather.router, prefix="/api/weather", tags=["Weather"])
 app.include_router(soil_health.router, prefix="/api/soil", tags=["Soil Health"])
-app.include_router(smart_irrigation.router, prefix="/api/irrigation", tags=["Smart Irrigation"])
+app.include_router(
+    smart_irrigation.router, prefix="/api/irrigation", tags=["Smart Irrigation"]
+)
 app.include_router(pest_detection.router, prefix="/api/pest", tags=["Pest Detection"])
-app.include_router(voice_assistant.router, prefix="/api/voice", tags=["Voice Assistant"])
+app.include_router(
+    voice_assistant.router, prefix="/api/voice", tags=["Voice Assistant"]
+)
+app.include_router(voice.router, prefix="/api/voice", tags=["Voice Assistant"])
 
 
 # ---------------------------------------------------------------------------
