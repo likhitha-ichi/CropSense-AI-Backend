@@ -1,9 +1,19 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from models.pest_models import PestDetectionResponse
-import random
-from typing import cast
+import tensorflow as tf
+import numpy as np
+import json
+from PIL import Image
+from io import BytesIO
 
 router = APIRouter()
+
+model = tf.keras.models.load_model("models/plant_disease_model.keras")
+
+with open("models/class_names.json") as f:
+    class_indices = json.load(f)
+
+classes = list(class_indices.keys())
 
 
 @router.post("/detect", response_model=PestDetectionResponse, summary="Detect pests from a crop image")
@@ -22,75 +32,59 @@ async def detect_pest(file: UploadFile = File(..., description="Crop leaf or pla
         )
 
     contents = await file.read()
+
     file_size_kb = len(contents) / 1024
 
-    # TODO: Run image through a trained CNN / transfer-learning model.
-    # Example with a joblib-saved sklearn pipeline or a TensorFlow/PyTorch model:
-    #   from utils.image_utils import preprocess_image
-    #   img_array = preprocess_image(contents)
-    #   prediction = pest_model.predict(img_array)
+    try:
+        image = Image.open(BytesIO(contents)).convert("RGB")
+        image = image.resize((224, 224))
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid image file."
+        )
 
-    import random
+    img = np.array(image) / 255.0
+    img = np.expand_dims(img, axis=0)
 
-    pests = [
-        {
-            "name": "Aphids",
-            "severity": "Moderate",
-            "treatment": [
-                "Apply neem oil spray.",
-                "Introduce ladybugs.",
-                "Remove heavily infested leaves."
-            ]
-        },
-        {
-            "name": "Leaf Miner",
-            "severity": "Low",
-            "treatment": [
-                "Remove damaged leaves.",
-                "Use sticky traps.",
-                "Apply neem oil if needed."
-            ]
-        },
-        {
-            "name": "Rice Blast",
-            "severity": "High",
-            "treatment": [
-                "Apply recommended fungicide.",
-                "Reduce excess nitrogen fertilizer.",
-                "Avoid overhead irrigation."
-            ]
-        },
-        {
-            "name": "Early Blight",
-            "severity": "Moderate",
-            "treatment": [
-                "Remove infected leaves.",
-                "Spray copper fungicide.",
-                "Improve air circulation."
-            ]
-        }
-    ]
+    prediction = model.predict(img, verbose=0)
 
-    prediction = random.choice(pests)
+    index = np.argmax(prediction)
+
+    confidence = float(prediction[0][index])
+
+    disease = classes[index]
+
+    # Determine severity
+    if "healthy" in disease.lower():
+        severity = "Low"
+    else:
+        if confidence > 0.90:
+            severity = "High"
+        else:
+            severity = "Moderate"
+
+    # Treatment suggestions
+    if "healthy" in disease.lower():
+        treatment = [
+            "Plant appears healthy.",
+            "Continue regular irrigation.",
+            "Monitor the crop regularly."
+        ]
+    else:
+        treatment = [
+            "Remove infected leaves.",
+            "Apply recommended fungicide or pesticide.",
+            "Avoid spreading the infection.",
+            "Consult your local agricultural officer."
+        ]
 
     return PestDetectionResponse(
-        detected_pest=str(prediction["name"]),
-        confidence=float(round(random.uniform(0.88, 0.98), 2)),
-        severity=str(prediction["severity"]),
-        treatment=cast(list[str], prediction["treatment"]), # leave this for now
-        file_name=file.filename if file.filename else "",
+        detected_pest=disease,
+        confidence=confidence,
+        severity=severity,
+        treatment=treatment,
+        file_name=file.filename,
         file_size_kb=round(file_size_kb, 2),
-        message="Demo prediction. AI model will be connected later."
+        message="Prediction generated using trained AI model."
     )
-
-@router.get("/pests", summary="List detectable pests and diseases")
-def list_pests():
-    """Return all pests and diseases the model can currently detect."""
-    return {
-        "pests": [
-            "Aphids", "Armyworm", "Bacterial Blight", "Brown Spot",
-            "Colorado Potato Beetle", "Early Blight", "Gray Leaf Spot",
-            "Late Blight", "Leaf Miner", "Powdery Mildew",
-            "Rice Blast", "Stem Borer", "Whitefly", "Yellow Mosaic Virus",
-        ]
-    }

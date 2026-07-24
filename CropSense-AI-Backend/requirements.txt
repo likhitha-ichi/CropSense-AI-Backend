@@ -8,3 +8,6 @@ requests
 python-multipart
 google-genai
 groq
+tensorflow
+Pillow
+numpy
