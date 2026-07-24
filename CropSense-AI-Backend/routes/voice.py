@@ -34,6 +34,11 @@ async def ask_ai(data: VoiceRequest):
     - Use simple language that farmers can understand.
     - If the question is unrelated to farming, politely say
       you only answer agriculture questions.
+      - Give practical agriculture advice.
+      - If the question asks for fertilizer, crop recommendation, or disease treatment:
+        ask for missing details like crop stage, soil type, location, and symptoms.
+      - Never give dangerous chemical recommendations without context.
+      - Keep answers simple for farmers.
 
     Farmer's Question:
     {data.question}
